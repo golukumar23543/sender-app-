@@ -231,20 +231,24 @@ export function P2PSender({ onBack }: P2PSenderProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-8 relative"
+        className="bg-neutral-900/50 backdrop-blur-2xl border border-neutral-800 shadow-2xl rounded-[2rem] p-8 relative overflow-hidden"
       >
-        <button 
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+        
+        <motion.button 
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={onBack}
-          className="absolute top-6 left-6 p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors"
+          className="absolute top-6 left-6 p-2 text-neutral-400 hover:text-white bg-neutral-800/50 hover:bg-neutral-700 rounded-full transition-colors duration-300 z-10 border border-neutral-700/50"
         >
           <ArrowLeft className="w-5 h-5" />
-        </button>
+        </motion.button>
 
-        <div className="text-center mb-8 mt-2">
-          <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center mb-8 mt-2 relative z-10">
+          <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
             <UploadCloud className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Send File</h1>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">Send File</h1>
         </div>
 
         <AnimatePresence mode="wait">
@@ -255,8 +259,8 @@ export function P2PSender({ onBack }: P2PSenderProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className={cn(
-                "relative border-2 border-dashed rounded-2xl p-10 text-center transition-colors cursor-pointer",
-                dragActive ? "border-blue-500 bg-blue-50/50" : "border-slate-200 hover:border-blue-400 hover:bg-slate-50/50"
+                "relative z-10 border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-300 cursor-pointer shadow-inner",
+                dragActive ? "border-indigo-500 bg-indigo-500/10" : "border-neutral-700 hover:border-indigo-400/50 hover:bg-neutral-800/50"
               )}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -270,9 +274,9 @@ export function P2PSender({ onBack }: P2PSenderProps) {
                 className="hidden"
                 onChange={handleChange}
               />
-              <FileType className="w-10 h-10 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-sm font-medium text-slate-700">Click or drag any file here</h3>
-              <p className="text-xs text-slate-500 mt-1">Unlimited file size support</p>
+              <FileType className={cn("w-10 h-10 mx-auto mb-4 transition-colors", dragActive ? "text-indigo-400" : "text-neutral-500")} />
+              <h3 className="text-sm font-medium text-neutral-200">Click or drag any file here</h3>
+              <p className="text-xs text-neutral-500 mt-1">Unlimited file size support</p>
             </motion.div>
           )}
 
@@ -282,28 +286,28 @@ export function P2PSender({ onBack }: P2PSenderProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="text-center space-y-6"
+              className="text-center space-y-6 relative z-10"
             >
               <div>
-                <h3 className="text-lg font-medium text-slate-900">Waiting for receiver</h3>
-                <p className="text-sm text-slate-500 mt-1">Enter this PIN on the receiving device to connect.</p>
+                <h3 className="text-lg font-medium text-white">Waiting for receiver</h3>
+                <p className="text-sm text-neutral-400 mt-1">Enter this PIN on the receiving device to connect.</p>
               </div>
 
               <div className="flex justify-center items-center">
-                <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-8 text-4xl font-bold tracking-[0.25em] text-blue-600 font-mono">
+                <div className="bg-neutral-950/50 border-2 border-neutral-800 rounded-2xl py-4 px-8 text-4xl font-bold tracking-[0.25em] text-indigo-400 font-mono shadow-inner">
                   {roomId}
                 </div>
               </div>
 
               <div className="py-4 flex flex-col items-center">
-                <p className="text-xs text-slate-400 mb-4 uppercase tracking-wider font-semibold">Or Scan QR</p>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 inline-block">
+                <p className="text-xs text-neutral-500 mb-4 uppercase tracking-wider font-semibold">Or Scan QR</p>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-neutral-200 inline-block">
                   <QRCodeSVG value={joinLink} size={120} />
                 </div>
               </div>
               
-              <div className="flex items-center justify-center space-x-2 text-sm text-slate-500 animate-pulse">
-                <Loader2 className="w-4 h-4 animate-spin" />
+              <div className="flex items-center justify-center space-x-2 text-sm text-neutral-400 animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
                 <span>Waiting for connection...</span>
               </div>
             </motion.div>
@@ -314,10 +318,10 @@ export function P2PSender({ onBack }: P2PSenderProps) {
                 key="connecting"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center py-8"
+                className="flex flex-col items-center py-8 relative z-10"
               >
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
-                <p className="text-sm font-medium text-slate-700">Establishing P2P direct connection...</p>
+                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
+                <p className="text-sm font-medium text-neutral-300">Establishing P2P direct connection...</p>
              </motion.div>
           )}
 
@@ -327,30 +331,32 @@ export function P2PSender({ onBack }: P2PSenderProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="space-y-6"
+              className="space-y-6 relative z-10"
             >
-              <div className="bg-slate-50 rounded-2xl p-4 flex items-center space-x-4 border border-slate-100">
-                <div className="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center flex-shrink-0">
-                  <FileType className="w-5 h-5 text-blue-500" />
+              <div className="bg-neutral-800/50 rounded-2xl p-4 flex items-center space-x-4 border border-neutral-700/50 shadow-inner">
+                <div className="w-10 h-10 bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm flex items-center justify-center flex-shrink-0">
+                  <FileType className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div className="overflow-hidden flex-1">
-                  <p className="text-sm font-medium text-slate-800 truncate">{file.name}</p>
-                  <p className="text-xs text-slate-500">{formatBytes(file.size)}</p>
+                  <p className="text-sm font-medium text-neutral-200 truncate">{file.name}</p>
+                  <p className="text-xs text-neutral-500">{formatBytes(file.size)}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                <div className="flex justify-between text-xs font-medium text-neutral-400 mb-1">
                   <span>Transferring...</span>
-                  <span>{progress.toFixed(1)}%</span>
+                  <span className="text-indigo-400">{progress.toFixed(1)}%</span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-neutral-800 rounded-full h-2 overflow-hidden shadow-inner border border-neutral-700/50">
                   <motion.div
-                    className="bg-blue-600 h-full rounded-full"
+                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full"
                     style={{ width: `${progress}%` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="flex justify-end text-xs text-slate-400 font-mono">
+                <div className="flex justify-end text-xs text-neutral-500 pt-1 font-mono">
                   {speed}
                 </div>
               </div>
@@ -362,27 +368,44 @@ export function P2PSender({ onBack }: P2PSenderProps) {
               key="completed"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center space-y-6"
+              className="text-center space-y-6 relative z-10"
             >
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-slate-900">Transfer Complete!</h3>
-                <p className="text-sm text-slate-500 mt-1">File sent successfully via P2P.</p>
-              </div>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/30"
+              >
+                <motion.div
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <CheckCircle2 className="w-8 h-8" />
+                </motion.div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="text-lg font-medium text-white">Transfer Complete!</h3>
+                <p className="text-sm text-neutral-400 mt-1">File sent successfully via P2P.</p>
+              </motion.div>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setFile(null);
                   setRoomId(null);
                   setStatus('selecting');
                   setProgress(0);
                 }}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-xl transition-colors shadow-lg shadow-slate-900/20"
+                className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-medium py-3 rounded-xl transition-colors duration-300 shadow-lg border border-neutral-700 hover:border-neutral-500"
               >
                 Send Another File
-              </button>
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>

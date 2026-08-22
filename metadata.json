@@ -1,6 +1,6 @@
 {
-  "name": "Beam Transfer",
-  "description": "A minimal app to easily transfer and share image and video files.",
+  "name": "Sender App",
+  "description": "A minimal, premium app to easily transfer and share files directly.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
