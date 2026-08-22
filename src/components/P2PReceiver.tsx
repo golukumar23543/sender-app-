@@ -28,6 +28,7 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
   const [errorMessage, setErrorMessage] = useState('');
   const [pin, setPin] = useState('');
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
+  const metadataRef = useRef<FileMetadata | null>(null);
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState('');
   
@@ -100,11 +101,13 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
           const msg = JSON.parse(event.data);
           
           if (msg.type === 'metadata') {
-            setMetadata({
+            const newMetadata = {
               name: msg.name,
               size: msg.size,
               mimeType: msg.mimeType
-            });
+            };
+            setMetadata(newMetadata);
+            metadataRef.current = newMetadata;
             setStatus('transferring');
             lastTimeRef.current = Date.now();
             bytesSinceLastRef.current = 0;
@@ -124,11 +127,12 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
             if (useStreamRef.current && fileStreamRef.current) {
               await fileStreamRef.current.close();
             } else {
-              const blob = new Blob(chunksRef.current, { type: metadata?.mimeType });
+              const meta = metadataRef.current;
+              const blob = new Blob(chunksRef.current, { type: meta?.mimeType || 'application/octet-stream' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = metadata?.name || 'download';
+              a.download = meta?.name || 'download';
               a.click();
               chunksRef.current = [];
               URL.revokeObjectURL(url);
@@ -139,8 +143,8 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
           receivedBytesRef.current += event.data.byteLength;
           bytesSinceLastRef.current += event.data.byteLength;
           
-          if (metadata) {
-            setProgress((receivedBytesRef.current / metadata.size) * 100);
+          if (metadataRef.current) {
+            setProgress((receivedBytesRef.current / metadataRef.current.size) * 100);
           }
           
           const now = Date.now();
