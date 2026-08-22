@@ -25,6 +25,7 @@ interface P2PReceiverProps {
 
 export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
   const [status, setStatus] = useState<'entering-pin' | 'joining' | 'connecting' | 'waiting-info' | 'transferring' | 'completed' | 'full' | 'error'>('entering-pin');
+  const [errorMessage, setErrorMessage] = useState('');
   const [pin, setPin] = useState('');
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
   const [progress, setProgress] = useState(0);
@@ -62,14 +63,16 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
       const roomSnapshot = await getDoc(roomRef);
       
       if (!roomSnapshot.exists()) {
+        setErrorMessage('Room does not exist.');
         setStatus('error');
         return;
       }
       
       setStatus('connecting');
       await initializePeerConnection(roomToJoin, roomSnapshot.data());
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setErrorMessage(e.message || 'Failed to connect to the room.');
       setStatus('error');
     }
   };
@@ -157,21 +160,30 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
       };
     };
     
-    // Set remote description from offer
-    if (roomData.offer) {
-      const offer = new RTCSessionDescription(roomData.offer);
-      await pc.setRemoteDescription(offer);
-      
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      
-      await updateDoc(roomRef, {
-        answer: {
-          type: answer.type,
-          sdp: answer.sdp,
+    // Listen for room updates (specifically for the offer if it wasn't there yet)
+    unsubRoomRef.current = onSnapshot(roomRef, async (snapshot) => {
+      const data = snapshot.data();
+      if (!data) return;
+
+      if (data.offer && !pc.currentRemoteDescription) {
+        try {
+          const offer = new RTCSessionDescription(data.offer);
+          await pc.setRemoteDescription(offer);
+          
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          
+          await updateDoc(roomRef, {
+            answer: {
+              type: answer.type,
+              sdp: answer.sdp,
+            }
+          });
+        } catch (e) {
+          console.error("Failed to process offer:", e);
         }
-      });
-    }
+      }
+    });
 
     // Listen for remote ICE candidates
     unsubCallerRef.current = onSnapshot(callerCandidatesCollection, (snapshot) => {
@@ -190,8 +202,8 @@ export function P2PReceiver({ initialRoom, onBack }: P2PReceiverProps) {
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500 mb-6">
           <FileWarning className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">PIN Invalid or Expired</h2>
-        <p className="text-slate-500 mb-8">This transfer session is already active, closed, or does not exist.</p>
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">Connection Failed</h2>
+        <p className="text-slate-500 mb-8">{errorMessage || 'This transfer session is already active, closed, or does not exist.'}</p>
         <button
           onClick={() => {
              setPin('');

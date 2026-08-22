@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { cn, formatBytes } from '../lib/utils';
 import { db } from '../lib/firebase';
-import { doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
 
 const CHUNK_SIZE = 65536; // 64KB chunks for optimal WebRTC performance
 const ICE_SERVERS = {
@@ -78,12 +78,21 @@ export function P2PSender({ onBack }: P2PSenderProps) {
   };
 
   const startSession = async (selectedFile: File) => {
-    setFile(selectedFile);
-    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
-    setRoomId(newRoomId);
-    setStatus('waiting');
-    
-    await initializePeerConnection(newRoomId, selectedFile);
+    try {
+      setFile(selectedFile);
+      const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+      setRoomId(newRoomId);
+      setStatus('waiting');
+      
+      const roomRef = doc(db, 'rooms', newRoomId);
+      await setDoc(roomRef, { createdAt: serverTimestamp(), status: 'waiting' });
+      
+      await initializePeerConnection(newRoomId, selectedFile);
+    } catch (e: any) {
+      console.error(e);
+      alert('Failed to start transfer session: ' + e.message);
+      setStatus('selecting');
+    }
   };
 
   const initializePeerConnection = async (room: string, fileToSend: File) => {
@@ -125,15 +134,12 @@ export function P2PSender({ onBack }: P2PSenderProps) {
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     
-    const roomWithOffer = {
+    await updateDoc(roomRef, {
       offer: {
         type: offer.type,
         sdp: offer.sdp,
       },
-      createdAt: serverTimestamp(),
-    };
-    
-    await setDoc(roomRef, roomWithOffer);
+    });
     
     // Listen for remote answer
     unsubRoomRef.current = onSnapshot(roomRef, async (snapshot) => {
@@ -170,13 +176,21 @@ export function P2PSender({ onBack }: P2PSenderProps) {
 
     const readSlice = () => {
       if (offset >= file.size) {
-        dc.send(JSON.stringify({ type: 'eof' }));
+        if (dc.readyState === 'open') {
+          dc.send(JSON.stringify({ type: 'eof' }));
+        }
         setStatus('completed');
         return;
       }
 
       const slice = file.slice(offset, offset + CHUNK_SIZE);
       slice.arrayBuffer().then(buffer => {
+        if (dc.readyState !== 'open') {
+          console.error("Data channel is not open");
+          setStatus('error');
+          return;
+        }
+        
         dc.send(buffer);
         offset += buffer.byteLength;
         bytesSinceLastRef.current += buffer.byteLength;
