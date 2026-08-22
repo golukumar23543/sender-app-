@@ -1,0 +1,30 @@
+{
+  "collections": {
+    "rooms": {
+      "description": "Signaling rooms for WebRTC connections",
+      "fields": {
+        "offer": { "type": "map", "description": "WebRTC offer SDP" },
+        "answer": { "type": "map", "description": "WebRTC answer SDP" },
+        "createdAt": { "type": "timestamp", "description": "Time room was created" }
+      },
+      "subcollections": {
+        "callerCandidates": {
+          "description": "ICE candidates from caller",
+          "fields": {
+            "candidate": { "type": "string" },
+            "sdpMid": { "type": "string" },
+            "sdpMLineIndex": { "type": "number" }
+          }
+        },
+        "calleeCandidates": {
+          "description": "ICE candidates from callee",
+          "fields": {
+            "candidate": { "type": "string" },
+            "sdpMid": { "type": "string" },
+            "sdpMLineIndex": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Beam Transfer",
+  "description": "A minimal app to easily transfer and share image and video files.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
