@@ -14,6 +14,7 @@ export default function App() {
   const [initialRoom, setInitialRoom] = useState<string | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -21,6 +22,17 @@ export default function App() {
     if (roomParam) {
       setInitialRoom(roomParam);
       setMode('receive');
+    }
+
+    const checkIOS = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(userAgent);
+    };
+    
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    
+    if (checkIOS() && !isStandalone) {
+      setIsIOS(true);
     }
 
     const handleBeforeInstallPrompt = (e: any) => {
@@ -124,20 +136,29 @@ export default function App() {
               </div>
               
               <AnimatePresence>
-                {isInstallable && (
+                {(isInstallable || isIOS) && (
                   <motion.div
                     initial={{ opacity: 0, y: 10, height: 0 }}
                     animate={{ opacity: 1, y: 0, height: 'auto' }}
                     exit={{ opacity: 0, y: 10, height: 0 }}
                     className="mt-6"
                   >
-                    <button
-                      onClick={handleInstallClick}
-                      className="w-full flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-xl transition-all duration-300"
-                    >
-                      <MonitorSmartphone className="w-5 h-5 text-indigo-400" />
-                      <span className="font-semibold text-indigo-200">Install App to Home Screen</span>
-                    </button>
+                    {isIOS ? (
+                      <div className="w-full flex flex-col items-center justify-center p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-xl transition-all duration-300">
+                        <MonitorSmartphone className="w-6 h-6 text-blue-400 mb-2" />
+                        <p className="text-sm text-blue-200 text-center">
+                          To install on iPhone: tap <strong className="font-bold text-blue-400">Share</strong> below, then <strong className="font-bold text-blue-400">Add to Home Screen</strong>.
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleInstallClick}
+                        className="w-full flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-xl transition-all duration-300"
+                      >
+                        <MonitorSmartphone className="w-5 h-5 text-indigo-400" />
+                        <span className="font-semibold text-indigo-200">Install App to Home Screen</span>
+                      </button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
