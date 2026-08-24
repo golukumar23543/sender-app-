@@ -1,6 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /installs/{installId} {
+      allow read: if true;
+      allow create: if true;
+    }
+    
     match /rooms/{roomId} {
       // For this ephemeral P2P file transfer app, anyone can create and join rooms
       // to exchange WebRTC signaling data.

@@ -1,5 +1,13 @@
 {
   "collections": {
+    "installs": {
+      "description": "Records of app installations",
+      "fields": {
+        "deviceInfo": { "type": "string", "description": "Device info (User Agent etc)" },
+        "platform": { "type": "string", "description": "Platform string (e.g. Android, iOS, Windows)" },
+        "installedAt": { "type": "timestamp", "description": "Time the app was installed/first opened in standalone mode" }
+      }
+    },
     "rooms": {
       "description": "Signaling rooms for WebRTC connections",
       "fields": {

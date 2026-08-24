@@ -6,15 +6,18 @@
 import React, { useEffect, useState } from 'react';
 import { P2PSender } from './components/P2PSender';
 import { P2PReceiver } from './components/P2PReceiver';
+import { AdminPanel } from './components/AdminPanel';
 import { Send, Download, Zap, MonitorSmartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { recordInstall } from './lib/tracking';
 
 export default function App() {
-  const [mode, setMode] = useState<'home' | 'send' | 'receive'>('home');
+  const [mode, setMode] = useState<'home' | 'send' | 'receive' | 'admin'>('home');
   const [initialRoom, setInitialRoom] = useState<string | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -35,6 +38,10 @@ export default function App() {
       setIsIOS(true);
     }
 
+    if (isStandalone) {
+      recordInstall();
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -42,11 +49,31 @@ export default function App() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', recordInstall);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', recordInstall);
     };
   }, []);
+
+  useEffect(() => {
+    if (logoClicks > 0) {
+      const timer = setTimeout(() => setLogoClicks(0), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [logoClicks]);
+
+  const handleLogoClick = () => {
+    setLogoClicks(prev => {
+      const newCount = prev + 1;
+      if (newCount === 5) {
+        setMode('admin');
+        return 0;
+      }
+      return newCount;
+    });
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -55,6 +82,7 @@ export default function App() {
     if (outcome === 'accepted') {
       setIsInstallable(false);
       setDeferredPrompt(null);
+      recordInstall();
     }
   };
 
@@ -82,7 +110,8 @@ export default function App() {
                   initial={{ scale: 0.8, rotate: -10 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                  className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(99,102,241,0.4)]"
+                  onClick={handleLogoClick}
+                  className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(99,102,241,0.4)] cursor-pointer"
                 >
                   <motion.div
                     animate={{ y: [0, -5, 0] }}
@@ -188,6 +217,12 @@ export default function App() {
           {mode === 'receive' && (
             <motion.div key="receive" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               <P2PReceiver initialRoom={initialRoom} onBack={() => { setMode('home'); setInitialRoom(null); }} />
+            </motion.div>
+          )}
+
+          {mode === 'admin' && (
+            <motion.div key="admin" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full flex justify-center">
+              <AdminPanel onBack={() => setMode('home')} />
             </motion.div>
           )}
         </AnimatePresence>
