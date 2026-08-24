@@ -114,7 +114,7 @@ export default function App() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setMode('send')}
-                  className="flex flex-col items-center justify-center p-6 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700/50 hover:border-indigo-500/50 rounded-2xl transition-all duration-300 group shadow-lg"
+                  className="relative z-20 cursor-pointer flex flex-col items-center justify-center p-6 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700/50 hover:border-indigo-500/50 rounded-2xl transition-all duration-300 group shadow-lg"
                 >
                   <div className="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center shadow-inner text-indigo-400 group-hover:text-indigo-300 mb-4 border border-neutral-800">
                     <Send className="w-5 h-5 ml-1" />
@@ -126,7 +126,7 @@ export default function App() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setMode('receive')}
-                  className="flex flex-col items-center justify-center p-6 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700/50 hover:border-emerald-500/50 rounded-2xl transition-all duration-300 group shadow-lg"
+                  className="relative z-20 cursor-pointer flex flex-col items-center justify-center p-6 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700/50 hover:border-emerald-500/50 rounded-2xl transition-all duration-300 group shadow-lg"
                 >
                   <div className="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center shadow-inner text-emerald-400 group-hover:text-emerald-300 mb-4 border border-neutral-800">
                     <Download className="w-5 h-5" />
@@ -144,16 +144,16 @@ export default function App() {
                     className="mt-6"
                   >
                     {isIOS ? (
-                      <div className="w-full flex flex-col items-center justify-center p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-xl transition-all duration-300">
-                        <MonitorSmartphone className="w-6 h-6 text-blue-400 mb-2" />
-                        <p className="text-sm text-blue-200 text-center">
-                          To install on iPhone: tap <strong className="font-bold text-blue-400">Share</strong> below, then <strong className="font-bold text-blue-400">Add to Home Screen</strong>.
+                      <div className="w-full relative z-20 flex flex-col items-center justify-center p-4 bg-transparent border border-neutral-800 border-dashed rounded-xl">
+                        <p className="text-sm text-neutral-400 text-center leading-relaxed">
+                          <strong className="text-white block mb-1">How to Install on iPhone:</strong>
+                          Tap the <strong className="text-blue-400">Share icon</strong> in your browser menu (bottom of screen), then select <strong className="text-blue-400">Add to Home Screen</strong>.
                         </p>
                       </div>
                     ) : (
                       <button
                         onClick={handleInstallClick}
-                        className="w-full flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-xl transition-all duration-300"
+                        className="w-full relative z-20 cursor-pointer flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-xl transition-all duration-300"
                       >
                         <MonitorSmartphone className="w-5 h-5 text-indigo-400" />
                         <span className="font-semibold text-indigo-200">Install App to Home Screen</span>
