@@ -6,12 +6,14 @@
 import React, { useEffect, useState } from 'react';
 import { P2PSender } from './components/P2PSender';
 import { P2PReceiver } from './components/P2PReceiver';
-import { Send, Download, Zap } from 'lucide-react';
+import { Send, Download, Zap, MonitorSmartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
   const [mode, setMode] = useState<'home' | 'send' | 'receive'>('home');
   const [initialRoom, setInitialRoom] = useState<string | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -20,7 +22,29 @@ export default function App() {
       setInitialRoom(roomParam);
       setMode('receive');
     }
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans text-neutral-200">
@@ -98,6 +122,39 @@ export default function App() {
                   <span className="font-semibold text-neutral-200">Receive</span>
                 </motion.button>
               </div>
+              
+              <AnimatePresence>
+                {isInstallable && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: 10, height: 0 }}
+                    className="mt-6"
+                  >
+                    <button
+                      onClick={handleInstallClick}
+                      className="w-full flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-xl transition-all duration-300"
+                    >
+                      <MonitorSmartphone className="w-5 h-5 text-indigo-400" />
+                      <span className="font-semibold text-indigo-200">Install App to Home Screen</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-8 text-center"
+              >
+                <div className="inline-block bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-4 py-3">
+                  <p className="text-xs text-indigo-300/80 leading-relaxed max-w-xs mx-auto">
+                    <strong className="text-indigo-400 font-semibold block mb-1">⚡ Superfast Offline Transfer</strong>
+                    Turn on Mobile Data + Hotspot on Phone 1, and connect Phone 2 to it. The file will transfer directly over Wi-Fi without using your data plan!
+                  </p>
+                </div>
+              </motion.div>
             </motion.div>
           )}
 
