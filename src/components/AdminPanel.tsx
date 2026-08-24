@@ -82,7 +82,8 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
   }
 
   const deviceCounts = installs.reduce((acc, curr) => {
-    acc[curr.platform || 'Unknown'] = (acc[curr.platform || 'Unknown'] || 0) + 1;
+    const name = curr.deviceName || curr.platform || 'Unknown';
+    acc[name] = (acc[name] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -119,14 +120,14 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
             <div className="bg-neutral-950/50 p-6 rounded-2xl border border-neutral-800 flex flex-col items-center justify-center">
               <Users className="w-8 h-8 text-blue-400 mb-2" />
               <div className="text-3xl font-bold text-white">{Object.keys(deviceCounts).length}</div>
-              <div className="text-sm text-neutral-400">Unique Platforms</div>
+              <div className="text-sm text-neutral-400">Unique Devices</div>
             </div>
           </div>
 
           <div className="bg-neutral-950/50 p-6 rounded-2xl border border-neutral-800">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-indigo-400" />
-              Installs by Device Platform
+              Installs by Device Model
             </h3>
             <div className="space-y-3">
               {Object.entries(deviceCounts).map(([platform, count]) => (
@@ -150,7 +151,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
                 <div key={install.id} className="bg-neutral-900 p-4 rounded-xl border border-neutral-800 flex flex-col space-y-2">
                   <div className="flex justify-between items-start">
                     <span className="text-indigo-400 font-semibold bg-indigo-500/10 px-3 py-1 rounded-md text-sm border border-indigo-500/20">
-                      {install.platform || 'Unknown OS'}
+                      {install.deviceName || install.platform || 'Unknown OS'}
                     </span>
                     <span className="text-neutral-500 text-xs font-mono">
                       {install.installedAt?.toDate ? install.installedAt.toDate().toLocaleString() : 'Just now'}
